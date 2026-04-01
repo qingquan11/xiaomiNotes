@@ -1,16 +1,16 @@
-name: SonarQube
+name: SonarQube Scan
 on:
   push:
     branches: [ master ]
 
 jobs:
-  sonar:
+  sonar-scan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # SonarQube必须拉取完整Git历史
 
       - name: Set up JDK 8
         uses: actions/setup-java@v4
@@ -18,28 +18,25 @@ jobs:
           java-version: '8'
           distribution: 'zulu'
 
-      - name: Download SonarQube Scanner
+      - name: Install SonarQube Scanner
         run: |
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2851-linux.zip
-          unzip -q sonar-scanner-cli-4.8.0.2851-linux.zip
-          chmod +x sonar-scanner-4.8.0.2851-linux/bin/sonar-scanner
+          # 下载SonarQube官方扫描器
+          wget -q https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+          unzip -q sonar-scanner-cli-5.0.1.3006-linux.zip
+          chmod +x sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner
 
-      - name: Run SonarQube Scan
+      - name: Run SonarQube Analysis
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: qingquan11_xiaominotes
-          SONAR_ORGANIZATION: qingquan11
-          SONAR_HOST_URL: https://sonarcloud.io
-          SONAR_SOURCES: src
-          SONAR_JAVA_BINARIES: bin
-          SONAR_JAVA_SOURCE: 1.8
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          sonar-scanner-4.8.0.2851-linux/bin/sonar-scanner \
-            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} \
-            -Dsonar.organization=${{ env.SONAR_ORGANIZATION }} \
-            -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
-            -Dsonar.sources=${{ env.SONAR_SOURCES }} \
-            -Dsonar.java.binaries=${{ env.SONAR_JAVA_BINARIES }} \
-            -Dsonar.java.source=${{ env.SONAR_JAVA_SOURCE }} \
+          # 直接用SonarQube扫描器，完全不依赖Gradle
+          sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner \
+            -Dsonar.projectKey=qingquan11_xiaominotes \
+            -Dsonar.organization=qingquan11 \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.sources=src \
+            -Dsonar.java.binaries=bin \
+            -Dsonar.java.source=1.8 \
+            -Dsonar.java.target=1.8 \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
