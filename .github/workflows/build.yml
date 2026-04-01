@@ -14,10 +14,10 @@ jobs:
         with:
           fetch-depth: 0  # SonarQube 必须拉取完整 Git 历史
 
-      - name: Set up JDK 17
+      - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '8'
           distribution: 'zulu'
 
       - name: Cache SonarQube packages
@@ -34,7 +34,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle-
 
-      # 核心：执行 Gradle 构建 + SonarQube 扫描
+      # 核心：执行 SonarQube 扫描
       - name: Run SonarQube analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
